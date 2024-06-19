@@ -1,39 +1,39 @@
-import pandas as pd
+import pandas
 from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 def Load_Data(Path):
-    return pd.read_csv(Path)
+    return pandas.read_csv(Path)
 
 def Prepare_Data(Data):
     weather_encoder = LabelEncoder()
     temperature_encoder = LabelEncoder()
     play_encoder = LabelEncoder()
 
-    Data['Weather'] = weather_encoder.fit_transform(Data['Weather'])
+    Data['Whether'] = weather_encoder.fit_transform(Data['Whether'])
     Data['Temperature'] = temperature_encoder.fit_transform(Data['Temperature'])
     Data['Play'] = play_encoder.fit_transform(Data['Play'])
 
     return Data, weather_encoder, temperature_encoder, play_encoder
 
-def Training(X, y, k=3):
-    knn = KNeighborsClassifier(n_neighbors=k)
-    knn.fit(X, y)
-    return knn
+def Training(Features, Labels, k=3):
+    KNN = KNeighborsClassifier(n_neighbors=k)
+    KNN.fit(Features, Labels)
+    return KNN
 
-def predict_play(knn, test_data, play_encoder):
-    prediction = knn.predict(test_data)
+def predict_play(KNN, test_data, play_encoder):
+    prediction = KNN.predict(test_data)
     play_decision = play_encoder.inverse_transform(prediction)
     return play_decision[0]
 
-def check_accuracy(X, y, k=3):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+def check_accuracy(Features, Labels, k=3):
+    data_train, data_test, target_train, target_test = train_test_split(Features, Labels, test_size=0.5, random_state=42)
     KNN = KNeighborsClassifier(n_neighbors=k)
-    KNN.fit(X_train, y_train)
-    y_pred = KNN.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
+    KNN.fit(data_train, target_train)
+    Prediction = KNN.predict(data_test)
+    accuracy = accuracy_score(target_test, Prediction)
     return accuracy
 
 def main():
@@ -43,7 +43,7 @@ def main():
     Data = Load_Data(Path)
     Data, weather_encoder, temperature_encoder, play_encoder = Prepare_Data(Data)
     
-    Features = Data[['Weather', 'Temperature']]
+    Features = Data[['Whether', 'Temperature']]
     Labels = Data['Play']
 
     KNN = Training(Features, Labels, k=3)
@@ -54,8 +54,10 @@ def main():
     print('Predicted Play Decision:',play_decision)
 
     for k in range(1, 6):
-        accuracy = check_accuracy(Features, Labels, k)
-        print('Accuracy for k={k}:',accuracy)
+
+        Accuracy = check_accuracy(Features, Labels, k)
+        print(f"Accuracy of classification algorithm with K = {k} : Neighbor classifier is",Accuracy*100,"%")
+
 
 if __name__ == "__main__":
     main()
